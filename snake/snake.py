@@ -2,8 +2,6 @@ import tkinter as tk
 from PIL import ImageTk, Image
 from random import randint
 
-MOVE = 20
-
 
 class Snake(tk.Canvas):
     def __init__(self):
@@ -14,6 +12,7 @@ class Snake(tk.Canvas):
         self.load_images()
         self.bind_all("<Key>", self.on_key_press)
         self.after(75, self.perform_action)
+        self.MOVE = 20
 
     def load_images(self):
         # Load images if the path is correct, otherwise destroy root
@@ -35,16 +34,16 @@ class Snake(tk.Canvas):
     def move_snake(self):
         head_x_position, head_y_position = self.snake_positions[0]
         if self.direction == "Right":
-            new_head_position = [(head_x_position + MOVE, head_y_position)]
+            new_head_position = [(head_x_position + self.MOVE, head_y_position)]
             self.snake_positions = new_head_position + self.snake_positions[:-1]
         if self.direction == "Left":
-            new_head_position = [(head_x_position - MOVE, head_y_position)]
+            new_head_position = [(head_x_position - self.MOVE, head_y_position)]
             self.snake_positions = new_head_position + self.snake_positions[:-1]
         if self.direction == "Up":
-            new_head_position = [(head_x_position, head_y_position - MOVE)]
+            new_head_position = [(head_x_position, head_y_position - self.MOVE)]
             self.snake_positions = new_head_position + self.snake_positions[:-1]
         if self.direction == "Down":
-            new_head_position = [(head_x_position, head_y_position + MOVE)]
+            new_head_position = [(head_x_position, head_y_position + self.MOVE)]
             self.snake_positions = new_head_position + self.snake_positions[:-1]
 
         for i, j in zip(self.find_withtag("snake"), self.snake_positions):
@@ -67,8 +66,8 @@ class Snake(tk.Canvas):
 
     def set_new_food_position(self):
         while True:
-            x_position = randint(1, 29) * MOVE
-            y_position = randint(3, 30) * MOVE
+            x_position = randint(1, 29) * self.MOVE
+            y_position = randint(3, 30) * self.MOVE
             food_position = (x_position, y_position)
             if food_position not in self.snake_positions:
                 return [food_position]
