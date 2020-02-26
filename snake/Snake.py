@@ -1,30 +1,31 @@
 import tkinter as tk
 from PIL import ImageTk, Image
 from random import randint
+from tkinter import ttk
 
 
 class Snake(tk.Canvas):
-    def __init__(self):
+    def __init__(self, speed):
         super().__init__(width=600, height=620, background="black")
+        self.speed = speed
         self.snake_positions = [(100, 100), (80, 100), (60, 100)]
         self.food_position = [(200, 200)]
         self.direction = "Right"
         self.load_images()
         self.bind_all("<Key>", self.on_key_press)
-        self.after(75, self.perform_action)
+        self.after(self.speed, self.perform_action)
         self.MOVE = 20
 
     def load_images(self):
         # Load images if the path is correct, otherwise destroy root
         try:
-            snake_body_image = Image.open("./assets/snake.png")
+            snake_body_image = Image.open("assets/snake.png")
             self.snake_image = ImageTk.PhotoImage(snake_body_image)
 
-            food_image_x = Image.open("./assets/food.png")
+            food_image_x = Image.open("assets/food.png")
             self.food_image = ImageTk.PhotoImage(food_image_x)
         except IOError:
             print("There is no images to load !!!")
-            root.destroy()
         # If images were loaded, put them on the screen
         # snake_images
         for position in self.snake_positions:
@@ -55,7 +56,7 @@ class Snake(tk.Canvas):
                 head_x_position in (0, 600)
                 or head_y_position in (0, 620)
                 or (head_x_position, head_y_position) in self.snake_positions[1:]
-                )
+        )
 
     def check_food_collision(self):
         if self.snake_positions[0] == self.food_position[0]:
@@ -88,10 +89,4 @@ class Snake(tk.Canvas):
             self.delete(tk.ALL)
         self.check_food_collision()
         self.move_snake()
-        self.after(75, self.perform_action)
-
-
-root = tk.Tk()
-snake = Snake()
-snake.pack()
-root.mainloop()
+        self.after(self.speed, self.perform_action)

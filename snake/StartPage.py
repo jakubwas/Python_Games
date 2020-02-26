@@ -1,6 +1,7 @@
 from tkinter import ttk
-from snake.Frames.style import Style
-from snake.Frames.Difficulty import Difficulty
+from snake.style import Style
+from snake.Difficulty import Difficulty
+from snake.GameFrame import GameFrame
 
 COLOUR_BUTTON_ACTIVE = "#58c77c"
 COLOUR_BUTTON_PRESSED = "#44e378"
@@ -15,7 +16,8 @@ class StartPage(ttk.Frame):
         style = Style()
 
         # Start game button
-        button_start_game = ttk.Button(self, text="\nStart Game\n")
+        button_start_game = ttk.Button(self, text="\nStart Game\n", command=lambda:
+                                       controller.show_frame(GameFrame))
 
         button_start_game.grid(row=0, column=0, sticky="EW", pady=pad_y)
 

@@ -1,7 +1,9 @@
 from tkinter import ttk
 import tkinter as tk
-from snake.Frames.Difficulty import Difficulty
-from snake.Frames.StartPage import StartPage
+from snake.Difficulty import Difficulty
+from snake.StartPage import StartPage
+from snake.GameFrame import GameFrame
+
 # Buttons: Start Game
 #          Difficulty level: Easy, Medium, Hard
 #          Quit
@@ -21,7 +23,7 @@ class MainWindow(tk.Tk):
         container = ttk.Frame(self)
         container.grid()
 
-        for FrameClass in (StartPage, Difficulty):
+        for FrameClass in (StartPage, Difficulty, GameFrame):
             frame = FrameClass(container, self)
             self.frames[FrameClass] = frame
             frame.grid(row=0, column=0, sticky="NSEW")
