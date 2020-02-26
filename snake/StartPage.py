@@ -28,9 +28,9 @@ class StartPage(ttk.Frame):
         button_difficulty.grid(row=1, column=0, sticky="EW", pady=pad_y)
 
         # Option button
-        button_option = ttk.Button(self, text="\nOption\n")
+        # button_option = ttk.Button(self, text="\nOption\n")
 
-        button_option.grid(row=2, column=0, sticky="EW", pady=pad_y)
+        # button_option.grid(row=2, column=0, sticky="EW", pady=pad_y)
 
         # Quit button
         button_quit = ttk.Button(self, text="\nQuit\n", command=quit)

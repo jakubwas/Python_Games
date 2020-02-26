@@ -1,13 +1,13 @@
 import tkinter as tk
 from PIL import ImageTk, Image
 from random import randint
-from tkinter import ttk
 
 
 class Snake(tk.Canvas):
     def __init__(self, speed):
-        super().__init__(width=600, height=620, background="black")
+        super().__init__(highlightthickness=0, width=600, height=620, background="black")
         self.speed = speed
+        self.score = 0
         self.snake_positions = [(100, 100), (80, 100), (60, 100)]
         self.food_position = [(200, 200)]
         self.direction = "Right"
@@ -17,6 +17,10 @@ class Snake(tk.Canvas):
         self.MOVE = 20
 
     def load_images(self):
+        # create text with score
+        self.create_text(
+            35, 12, text=f"     Score: {self.score}", tag="score", fill="#fff", font=10
+        )
         # Load images if the path is correct, otherwise destroy root
         try:
             snake_body_image = Image.open("assets/snake.png")
@@ -31,6 +35,7 @@ class Snake(tk.Canvas):
         for position in self.snake_positions:
             self.create_image(*position, image=self.snake_image, tag="snake")
         self.create_image(*self.food_position, image=self.food_image, tag="food")
+        self.create_rectangle(7, 27, 593, 613, outline="#0019bf")
 
     def move_snake(self):
         head_x_position, head_y_position = self.snake_positions[0]
@@ -54,12 +59,15 @@ class Snake(tk.Canvas):
         head_x_position, head_y_position = self.snake_positions[0]
         return (
                 head_x_position in (0, 600)
-                or head_y_position in (0, 620)
+                or head_y_position in (20, 620)
                 or (head_x_position, head_y_position) in self.snake_positions[1:]
         )
 
     def check_food_collision(self):
         if self.snake_positions[0] == self.food_position[0]:
+            self.score += 1
+            score = self.find_withtag("score")
+            self.itemconfigure(score, text=f"     Score: {self.score}", tag="score")
             self.snake_positions.append(self.snake_positions[-1])
             self.create_image(*self.snake_positions[-1], image=self.snake_image, tag="snake")
             self.food_position = self.set_new_food_position()
@@ -84,9 +92,24 @@ class Snake(tk.Canvas):
         ):
             self.direction = new_direction
 
+    def play_again(self, e):
+        key = e.keysym
+        if key == "a":
+            self.destroy()
+            snake = Snake(75)
+            snake.grid()
+
     def perform_action(self):
         if self.check_collision():
             self.delete(tk.ALL)
+            self.create_text(
+                self.winfo_width() / 2,
+                self.winfo_height() / 2,
+                text=f"Game over! You scored {self.score}!\n    Press 'a' to play again.",
+                fill="#fff",
+                font=15
+            )
+            self.bind_all("<Key>", self.play_again)
         self.check_food_collision()
         self.move_snake()
         self.after(self.speed, self.perform_action)
