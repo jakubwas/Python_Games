@@ -4,28 +4,38 @@ from random import randint
 
 
 class Snake(tk.Canvas):
-    def __init__(self, speed):
+    def __init__(self, speed, controller, start_page):
         super().__init__(highlightthickness=0, width=600, height=620, background="black")
+
+        self.controller = controller
+        self.start_page = start_page
+        # Default speed is 75
         self.speed = speed
+        # Beginning score
         self.score = 0
+        # Start snake position
         self.snake_positions = [(100, 100), (80, 100), (60, 100)]
+        # Beginning food position
         self.food_position = [(200, 200)]
+        # At the beginning snake moves to the right
         self.direction = "Right"
+        # Snake's image has 20px
+        self.MOVE = 20
+
         self.load_images()
         self.bind_all("<Key>", self.on_key_press)
         self.after(self.speed, self.perform_action)
-        self.MOVE = 20
 
+    # Load images and put them on the screen
     def load_images(self):
         # create text with score
         self.create_text(
             35, 12, text=f"     Score: {self.score}", tag="score", fill="#fff", font=10
         )
-        # Load images if the path is correct, otherwise destroy root
+        # Load images if the path is correct, otherwise destroy the root
         try:
             snake_body_image = Image.open("assets/snake.png")
             self.snake_image = ImageTk.PhotoImage(snake_body_image)
-
             food_image_x = Image.open("assets/food.png")
             self.food_image = ImageTk.PhotoImage(food_image_x)
         except IOError:
@@ -34,11 +44,19 @@ class Snake(tk.Canvas):
         # snake_images
         for position in self.snake_positions:
             self.create_image(*position, image=self.snake_image, tag="snake")
+        # food_image
         self.create_image(*self.food_position, image=self.food_image, tag="food")
+        # create rectangle which initialize the board game
         self.create_rectangle(7, 27, 593, 613, outline="#0019bf")
 
+    # How does the snake move ?
     def move_snake(self):
+        # Coordinates of the snake's head
         head_x_position, head_y_position = self.snake_positions[0]
+        # Snake's image has 20px. Depends on what direction the user choose, add or subtract 20px from snake's head
+        # position so that we now have new coordinates of the snake's head. Then update the snake_position so that now
+        # it contains new head coordinates and old elements except the last one.
+        # Update snake's coordinates
         if self.direction == "Right":
             new_head_position = [(head_x_position + self.MOVE, head_y_position)]
             self.snake_positions = new_head_position + self.snake_positions[:-1]
@@ -51,10 +69,11 @@ class Snake(tk.Canvas):
         if self.direction == "Down":
             new_head_position = [(head_x_position, head_y_position + self.MOVE)]
             self.snake_positions = new_head_position + self.snake_positions[:-1]
-
+        # Change the location of the snake's images to the new one.
         for i, j in zip(self.find_withtag("snake"), self.snake_positions):
             self.coords(i, *j)
 
+    # Define when the game ends
     def check_collision(self):
         head_x_position, head_y_position = self.snake_positions[0]
         return (
@@ -96,8 +115,11 @@ class Snake(tk.Canvas):
         key = e.keysym
         if key == "a":
             self.destroy()
-            snake = Snake(75)
+            snake = Snake(self.speed, self.controller, self.start_page)
             snake.grid()
+        elif key == "Escape":
+            self.controller.show_frame(self.start_page)
+            self.destroy()
 
     def perform_action(self):
         if self.check_collision():
@@ -105,7 +127,7 @@ class Snake(tk.Canvas):
             self.create_text(
                 self.winfo_width() / 2,
                 self.winfo_height() / 2,
-                text=f"Game over! You scored {self.score}!\n    Press 'a' to play again.",
+                text=f"    Game over! You scored {self.score}!\n        Press 'a' to play again\nor escape to go to main menu.",
                 fill="#fff",
                 font=15
             )
