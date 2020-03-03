@@ -23,3 +23,4 @@ class Style:
             "TButton",
             background=[("pressed", COLOUR_BUTTON_PRESSED), ("active", COLOUR_BUTTON_ACTIVE)],
         )
+

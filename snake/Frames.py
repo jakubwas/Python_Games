@@ -10,15 +10,15 @@ from snake.Style import Style
 #          Quit
 
 # Default game speed:
-SPEED = 75
+UPDATE_SPEED = 75
 # Default button padding
 pad_y = (0, 10)
 
 
 # Change game speed (Difficulty level)
 def change_speed(speed):
-    global SPEED
-    SPEED = speed
+    global UPDATE_SPEED
+    UPDATE_SPEED = speed
 
 
 class MainWindow(tk.Tk):
@@ -109,7 +109,7 @@ class GameFrame(ttk.Frame):
     def on_key_press(self, e):
         key = e.keysym
         if key == "a":
-            snake_obj = Snake(SPEED, self.controller, StartPage)
+            snake_obj = Snake(UPDATE_SPEED, self.controller, StartPage)
             snake_obj.grid()
 
 

@@ -10,7 +10,7 @@ class Snake(tk.Canvas):
         self.controller = controller
         self.start_page = start_page
         # Default speed is 75
-        self.speed = speed
+        self.update_speed = speed
         # Beginning score
         self.score = 0
         # Start snake position
@@ -24,7 +24,7 @@ class Snake(tk.Canvas):
 
         self.load_images()
         self.bind_all("<Key>", self.on_key_press)
-        self.after(self.speed, self.perform_action)
+        self.after(self.update_speed, self.perform_action)
 
     # Load images and put them on the screen
     def load_images(self):
@@ -82,27 +82,38 @@ class Snake(tk.Canvas):
                 or (head_x_position, head_y_position) in self.snake_positions[1:]
         )
 
+    # How does the snake grow ?
     def check_food_collision(self):
         if self.snake_positions[0] == self.food_position[0]:
+            # Update the score
             self.score += 1
             score = self.find_withtag("score")
             self.itemconfigure(score, text=f"     Score: {self.score}", tag="score")
+            # Add new coordinates to the snake_position. Now we have 2 the same last snake's coordinates, but when the
+            # snake moves, the last element is being deleted, but because we have 2 the same last elements, only one of
+            # them is being deleted, so we ends with total length of the snake +1.
             self.snake_positions.append(self.snake_positions[-1])
             self.create_image(*self.snake_positions[-1], image=self.snake_image, tag="snake")
+            # Create new food position and add it into the screen
             self.food_position = self.set_new_food_position()
             self.coords(self.find_withtag("food"), *self.food_position[0])
 
+    # Generate new food position coordinates
     def set_new_food_position(self):
         while True:
             x_position = randint(1, 29) * self.MOVE
             y_position = randint(3, 30) * self.MOVE
             food_position = (x_position, y_position)
+            # Check if the food coordinates are valid.
             if food_position not in self.snake_positions:
                 return [food_position]
 
+    # Get the user input
     def on_key_press(self, e):
         new_direction = e.keysym
+        # All valid directions
         all_directions = {"Right", "Left", "Up", "Down"}
+        # e.x if we are moving right, we need to make sure we won't be able to move to the left.
         opposite_directions = ({"Right", "Left"}, {"Up", "Down"})
 
         if (
@@ -111,19 +122,25 @@ class Snake(tk.Canvas):
         ):
             self.direction = new_direction
 
+    # When we lose, press 'a' to play again or 'Escape' to leave to the Start Page
     def play_again(self, e):
+        # Get the user input
         key = e.keysym
+        # Play again
         if key == "a":
             self.destroy()
-            snake = Snake(self.speed, self.controller, self.start_page)
+            snake = Snake(self.update_speed, self.controller, self.start_page)
             snake.grid()
+        # Go to the Start Page
         elif key == "Escape":
             self.controller.show_frame(self.start_page)
             self.destroy()
 
+    # Perform action method that contains some of above methods.
     def perform_action(self):
         if self.check_collision():
             self.delete(tk.ALL)
+            # Display the message in the middle of the screen.
             self.create_text(
                 self.winfo_width() / 2,
                 self.winfo_height() / 2,
@@ -134,4 +151,4 @@ class Snake(tk.Canvas):
             self.bind_all("<Key>", self.play_again)
         self.check_food_collision()
         self.move_snake()
-        self.after(self.speed, self.perform_action)
+        self.after(self.update_speed, self.perform_action)
