@@ -119,8 +119,5 @@ class Sudoku:
             row = cords[i] // 9
             col = cords[i] % 9
             self.board[row][col] = 0
+        return self.board
 
-
-sudoku = Sudoku()
-sudoku.generate_random_sudoku()
-sudoku.print_board()
