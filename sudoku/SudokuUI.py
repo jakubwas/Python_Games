@@ -34,14 +34,22 @@ class SudokuUI(tk.Tk):
         self.stop_the_clock = None
         # Make sure we don't call after method many times at the same time
         self.multiple_after_methods = None
+        # Difficulty levels; 81 - level = amount of numbers that the board has
+        self.EASY = 40
+        self.MEDIUM = 50
+        self.HARD = 55
+
         #                                           Frames/canvas
         # Main frame
         self.container = tk.Frame(self, width=self.WINDOW_WIDTH, height=self.WINDOW_HEIGHT)
         self.container.grid(row=0, column=0, sticky="NSEW")
-        # Frame where are all widgets except canvas
+        # Button frame
         self.button_frame = tk.Frame(self.container)
         self.button_frame.grid(row=0, column=1, sticky="NSEW")
         self.button_frame.columnconfigure(0, weight=1)
+        # Difficulty level frame
+        self.difficulty_frame = tk.Frame(self.button_frame)
+        self.difficulty_frame.grid(row=8, column=0, sticky="NSEW", pady=(10, 0), padx=(50, 0))
         # Canvas (which includes sudoku grid)
         self.canvas = tk.Canvas(self.container, width=550, height=550)
         self.canvas.grid(row=0, column=0, sticky="NSEW")
@@ -67,7 +75,7 @@ class SudokuUI(tk.Tk):
         #                                             Buttons
         # Start Game button
         self.button_start_game = ttk.Button(self.button_frame, text="Start new Game", command=self.start_new_game)
-        self.button_start_game.grid(row=0, column=0, pady=(60, 0), padx=(35, 35), ipady=5)
+        self.button_start_game.grid(row=0, column=0, pady=(70, 0), padx=(35, 35), ipady=5)
         # Reset game button
         self.button_reset_current_board = ttk.Button(self.button_frame, text="Reset current Board",
                                                      command=self.reset_current_board)
@@ -81,8 +89,9 @@ class SudokuUI(tk.Tk):
         self.button_solve.grid(row=3, column=0, pady=(30, 0), padx=(35, 35))
         # Quit button
         self.button_quit = ttk.Button(self.button_frame, text="Quit", command=self.destroy)
-        self.button_quit.grid(row=7, column=0, pady=(30, 0), padx=(35, 35))
-        #                                             Labels
+        self.button_quit.grid(row=9, column=0, pady=(30, 0), padx=(35, 35))
+
+        #                                         Labels
         # Your time label
         self.label_time = ttk.Label(self.button_frame, text="Your time")
         self.label_time.grid(row=5, column=0, pady=(10, 0))
@@ -90,6 +99,23 @@ class SudokuUI(tk.Tk):
         self.text_variable = tk.StringVar(value="00:00")
         self.label_timer = ttk.Label(self.button_frame, textvariable=self.text_variable, style="timer.TLabel")
         self.label_timer.grid(row=6, column=0)
+        # Difficulty level
+        self.label_difficulty = ttk.Label(self.button_frame, text="Difficulty level")
+        self.label_difficulty.grid(row=7, column=0, pady=(20, 0))
+
+        #                                      RadioButtons
+        #
+        self.level = tk.IntVar()
+        # Easy
+        self.radiobutton_easy = ttk.Radiobutton(self.difficulty_frame, text="Easy", variable=self.level, value=self.EASY)
+        self.radiobutton_easy.grid(row=0, column=0)
+        # Medium
+        self.radiobutton_medium = ttk.Radiobutton(self.difficulty_frame, text="Medium", variable=self.level, value=self.MEDIUM)
+        self.level.set(self.MEDIUM)  # Default difficulty level is medium
+        self.radiobutton_medium.grid(row=0, column=1)
+        # Hard
+        self.radiobutton_hard = ttk.Radiobutton(self.difficulty_frame, text="Hard", variable=self.level, value=self.HARD)
+        self.radiobutton_hard.grid(row=0, column=2)
 
         # Initialize boards
         self.sudoku = Sudoku()  # Sudoku logic
@@ -262,7 +288,7 @@ class SudokuUI(tk.Tk):
         self.start_reset_similarities()
         # Generate new board and remove old elements from grid
         self.sudoku.new_board()
-        self.random_board_original = self.sudoku.generate_random_sudoku()
+        self.random_board_original = self.sudoku.generate_random_sudoku(int(self.level.get()))
         self.solution = self.sudoku.solved_board
         self.current_board = copy.deepcopy(self.random_board_original)
         self.fill_board_with_numbers()

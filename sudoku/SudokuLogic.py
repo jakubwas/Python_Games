@@ -97,11 +97,10 @@ class Sudoku:
                     self.board[row][column] = 0
 
     # To obtain random sudoku board, we remove x elements from solved board
-    def generate_random_sudoku(self):
+    def generate_random_sudoku(self, level):
         self.generate_random_full_board()
         self.solved_board = copy.deepcopy(self.board)
-        how_many_numbers = random.randint(60, 65)
-        print(how_many_numbers)
+        how_many_numbers = random.randint(level-5, level+5)
         sequence = [i for i in range(81)]
         cords = set()
         while len(cords) != how_many_numbers:
