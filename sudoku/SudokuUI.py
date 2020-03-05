@@ -1,5 +1,3 @@
-import time
-
 from sudoku.SudokuLogic import Sudoku
 import tkinter as tk
 from tkinter import ttk
@@ -32,8 +30,9 @@ class SudokuUI(tk.Tk):
         # then the value = -1
         self.row = -1
         self.col = -1
-        # ----------------------------------
+        # When the stop_the_clock is True, then the clock stops
         self.stop_the_clock = None
+        # Make sure we don't call after method many times at the same time
         self.multiple_after_methods = None
         #                                           Frames/canvas
         # Main frame
@@ -98,23 +97,46 @@ class SudokuUI(tk.Tk):
         self.current_board = None  # Current board where we put user input
         self.solution = None  # Original board with solution
 
+        # Draw sudoku grid, put the numbers there and start the game.
         self.draw_board()
         self.start_new_game()
 
+    # Events
     def bind_(self):
-        self.bind("<Button-1>", self.on_click_left)  # Left click (select/deselect cell)
-        # self.bind("<Button-3>", self.on_click) # Right click (delete content of the cell (if possible))
+        self.bind("<Button-1>", self.on_click)  # Left click (select/deselect cell)
+        self.bind("<Button-3>", self.on_click)  # Right click (delete content of the cell (if possible))
         self.bind("<Key>", self.key_pressed)  # Keyboard
 
     def unbind_(self):
         self.unbind("<Button-1>")
+        self.unbind("<Button-3>")
         self.unbind("<Key>")
 
+    # Delete all items with tags: numbers, red_border
     def delete_with_tags(self):
         self.canvas.delete("numbers")
         self.canvas.delete("red_border")
 
+    # This method can be used to remove number from the cell or put the new one.
+    def update_content_of_the_current_cell(self, row, col, value):  # if value = 0 then we remove element from the board
+        self.current_board[row][col] = value
+        self.canvas.delete("numbers")
+        self.fill_board_with_numbers()
+
+    # Reset current time (start again from 00:00)
+    def reset_time(self):
+        self.seconds = 0
+        self.minutes = 0
+
+    # Make sure we don't call after method many times at the same time
+    def check_multi_after_methods(self):
+        if self.multiple_after_methods:
+            self.after_cancel(self.multiple_after_methods)
+            self.multiple_after_methods = None
+        self.update_time()
+
     # Draw grid (straight lines, without numbers)
+    # This method is called only one time during the program.
     def draw_board(self):
         for i in range(1, 11):
             if (i - 1) % 3 == 0:
@@ -138,7 +160,7 @@ class SudokuUI(tk.Tk):
             y1 = self.CELL * 10
             self.canvas.create_line(x0, y0, x1, y1, fill=color, width=line_width)
 
-    # Put the numbers into board
+    # Put the numbers from current_board to the board
     def fill_board_with_numbers(self):
         for i in range(9):
             for j in range(9):
@@ -153,9 +175,9 @@ class SudokuUI(tk.Tk):
                         font = ("Helvetica", 12)
                     self.canvas.create_text(x, y, text=self.current_board[i][j], tags="numbers", font=font, fill=color)
 
-    # We call this method when the user clicks on the cell with a single left-click of the mouse
-    def on_click_left(self, event):
-        #  The x and y coordinates of where exactly the user clicked
+    # We call this method when the user clicks on the cell with a single left/right-click of the mouse
+    def on_click(self, event):
+        # The x and y coordinates of where exactly the user clicked
         x, y = event.x, event.y
         # If x, y are not indicate to any cell, then quit
         if str(event.widget) != ".!frame.!canvas":
@@ -163,8 +185,11 @@ class SudokuUI(tk.Tk):
         if (self.CELL <= x <= self.CELL * 10) and (self.CELL <= y <= self.CELL * 10):
             row = int((y - self.CELL) / self.CELL)
             col = int((x - self.CELL) / self.CELL)
-            print(row, col)
             if (0 <= (row and col) <= 8) and self.random_board_original[row][col] == 0:
+                # If we right-click on the cell, delete it's content
+                if event.num == 3:
+                    self.update_content_of_the_current_cell(row, col, 0)
+                    return
                 # If the cell had already been selected, then we’ll deselect the cell
                 if row == self.row and col == self.col:
                     self.row = -1
@@ -172,6 +197,7 @@ class SudokuUI(tk.Tk):
                     self.canvas.delete("red_border")
                     return  # Exit
 
+                # Position of the current selected cell
                 self.row = row
                 self.col = col
 
@@ -182,6 +208,7 @@ class SudokuUI(tk.Tk):
                 x1 = 2 * self.CELL + self.CELL * self.col
                 y1 = 2 * self.CELL + self.CELL * self.row
                 self.canvas.create_rectangle((x0, y0, x1, y1), outline="red", tag="red_border", width=1.5)
+            # If we click on the cell which content can't be changed
             else:
                 self.row = -1
                 self.col = -1
@@ -190,14 +217,11 @@ class SudokuUI(tk.Tk):
     def key_pressed(self, event):
         key = event.keysym
         if str(key) in "123456789" and (self.row and self.col) != -1:
-            self.current_board[self.row][self.col] = int(key)
-            self.canvas.delete("numbers")
-            self.fill_board_with_numbers()
+            self.update_content_of_the_current_cell(self.row, self.col, int(key))
         elif key == "BackSpace":
-            self.current_board[self.row][self.col] = 0
-            self.canvas.delete("numbers")
-            self.fill_board_with_numbers()
+            self.update_content_of_the_current_cell(self.row, self.col, 0)
 
+    # Update current time
     def update_time(self):
         # The time is displayed in format -> hours:minutes:seconds
         if self.stop_the_clock:
@@ -233,59 +257,49 @@ class SudokuUI(tk.Tk):
         # After 1 s call update_time method
         self.multiple_after_methods = self.after(1000, self.update_time)
 
-    def reset_time(self):
-        self.seconds = 0
-        self.minutes = 0
-
-    def check_multi_after_methods(self):
-        if self.multiple_after_methods:
-            self.after_cancel(self.multiple_after_methods)
-            self.multiple_after_methods = None
-        self.update_time()
-
     # Start new game -> reset time, remove current board and display new one
     def start_new_game(self):
-        # Start the clock
-        self.stop_the_clock = False
-        self.check_multi_after_methods()
-        # Events
-        self.bind_()
-
-        # Reset time from last game
-        self.reset_time()
+        self.start_reset_similarities()
         # Generate new board and remove old elements from grid
         self.sudoku.new_board()
-        self.canvas.delete("numbers")
         self.random_board_original = self.sudoku.generate_random_sudoku()
         self.solution = self.sudoku.solved_board
         self.current_board = copy.deepcopy(self.random_board_original)
         self.fill_board_with_numbers()
 
+    # Display the content of the random_board_original
     def reset_current_board(self):
         self.current_board = copy.deepcopy(self.random_board_original)
-        self.canvas.delete("numbers")
-        self.canvas.delete("red_border")
-        self.bind_()
-        self.stop_the_clock = False
-        self.check_multi_after_methods()
-        self.reset_time()
+        self.start_reset_similarities()
         self.fill_board_with_numbers()
 
+    # Method which combine similarities from start_new_game() and reset_current_board()
+    def start_reset_similarities(self):
+        self.delete_with_tags()
+        # Bind again in case we click show_solution button where we unbind events.
+        self.bind_()
+        # If we call reset_current_board() or start_new_game() we want to reset the time
+        self.reset_time()
+        # Set the value of the stop_the_clock to False so that the update_time() could work
+        self.stop_the_clock = False
+        # Make sure we don't call after method many times at the same time
+        self.check_multi_after_methods()
+
+    # Check the current answers
     def check_current_answers(self):
-        self.canvas.delete("numbers")
-        self.canvas.delete("red_border")
+        self.delete_with_tags()
         for i in range(9):
             for j in range(9):
                 if self.current_board[i][j]:
+                    # If the answer is correct:
                     if self.current_board[i][j] == self.solution[i][j]:
                         color = "black"
+                    # If the answer is wrong
                     else:
                         color = "red"
-                    font = ("Helvetica", 14, "bold")
-                    x = self.CELL + j * self.CELL + self.CELL / 2
-                    y = self.CELL + i * self.CELL + self.CELL / 2
-                    self.canvas.create_text(x, y, text=self.solution[i][j], tags="numbers", font=font, fill=color)
+                    self.check_show_similarities(i, j, color)
 
+    # Show solution of the current board
     def show_solution(self):
         self.canvas.delete("numbers")
         self.canvas.delete("red_border")
@@ -300,10 +314,14 @@ class SudokuUI(tk.Tk):
                 else:
                     # Use red font color if the answer is incorrect
                     color = "red"
-                font = ("Helvetica", 14, "bold")
-                x = self.CELL + j * self.CELL + self.CELL / 2
-                y = self.CELL + i * self.CELL + self.CELL / 2
-                self.canvas.create_text(x, y, text=self.solution[i][j], tags="numbers", font=font, fill=color)
+                self.check_show_similarities(i, j, color)
+
+    # Method which combine similarities from check_current_answer() and show_solution()
+    def check_show_similarities(self, i, j, color):
+        font = ("Helvetica", 14, "bold")
+        x = self.CELL + j * self.CELL + self.CELL / 2
+        y = self.CELL + i * self.CELL + self.CELL / 2
+        self.canvas.create_text(x, y, text=self.solution[i][j], tags="numbers", font=font, fill=color)
 
 
 sudokuUI = SudokuUI()

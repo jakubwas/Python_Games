@@ -23,21 +23,6 @@ class Sudoku:
             [0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]
 
-    def print_board(self):
-        print("—————————————————————————")
-        for i in range(9):
-            if i % 3 == 0 and i != 0:
-                print("—————————————————————————")
-            for j in range(9):
-                if j % 3 == 0:
-                    print("|", end=" ")
-                if j == 8:
-                    print(str(self.board[i][8]) + " |")
-                else:
-                    print(self.board[i][j], end=" ")
-        print("—————————————————————————")
-
-# SUDOKU SOLVER
     #  function used to find which positions are empty so that we could put a number there
     def is_empty(self):
         for i in range(9):
@@ -78,7 +63,7 @@ class Sudoku:
                     return False
         return True  # we return False if at least one of upper conditions return False, otherwise we return True
 
-    #  function which is used to solve sudoku, contains all upper method ( except the print_board method)
+    #  function which is used to solve sudoku, contains all upper method
     def solve_board(self):
         empty_coordinates = self.is_empty()
         if not empty_coordinates:
@@ -111,6 +96,7 @@ class Sudoku:
                 else:
                     self.board[row][column] = 0
 
+    # To obtain random sudoku board, we remove x elements from solved board
     def generate_random_sudoku(self):
         self.generate_random_full_board()
         self.solved_board = copy.deepcopy(self.board)
