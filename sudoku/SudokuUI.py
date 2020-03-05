@@ -8,6 +8,11 @@ COLOUR_BUTTON_NORMAL = "#5fba7d"
 COLOUR_BUTTON_ACTIVE = "#58c77c"
 COLOUR_BUTTON_PRESSED = "#44e378"
 
+# Difficulty levels; 81 - level = amount of numbers that the board has
+EASY = 40
+MEDIUM = 50
+HARD = 55
+
 
 class SudokuUI(tk.Tk):
     def __init__(self):
@@ -34,10 +39,6 @@ class SudokuUI(tk.Tk):
         self.stop_the_clock = None
         # Make sure we don't call after method many times at the same time
         self.multiple_after_methods = None
-        # Difficulty levels; 81 - level = amount of numbers that the board has
-        self.EASY = 40
-        self.MEDIUM = 50
-        self.HARD = 55
 
         #                                           Frames/canvas
         # Main frame
@@ -107,14 +108,26 @@ class SudokuUI(tk.Tk):
         #
         self.level = tk.IntVar()
         # Easy
-        self.radiobutton_easy = ttk.Radiobutton(self.difficulty_frame, text="Easy", variable=self.level, value=self.EASY)
+        self.radiobutton_easy = ttk.Radiobutton(
+            self.difficulty_frame,
+            text="Easy",
+            variable=self.level,
+            value=EASY)
         self.radiobutton_easy.grid(row=0, column=0)
         # Medium
-        self.radiobutton_medium = ttk.Radiobutton(self.difficulty_frame, text="Medium", variable=self.level, value=self.MEDIUM)
-        self.level.set(self.MEDIUM)  # Default difficulty level is medium
+        self.radiobutton_medium = ttk.Radiobutton(
+            self.difficulty_frame,
+            text="Medium",
+            variable=self.level,
+            value=MEDIUM)
+        self.level.set(MEDIUM)  # Default difficulty level is medium
         self.radiobutton_medium.grid(row=0, column=1)
         # Hard
-        self.radiobutton_hard = ttk.Radiobutton(self.difficulty_frame, text="Hard", variable=self.level, value=self.HARD)
+        self.radiobutton_hard = ttk.Radiobutton(
+            self.difficulty_frame,
+            text="Hard",
+            variable=self.level,
+            value=HARD)
         self.radiobutton_hard.grid(row=0, column=2)
 
         # Initialize boards
