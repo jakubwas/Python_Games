@@ -15,7 +15,7 @@ class SudokuUI(tk.Tk):
     def __init__(self):
         super().__init__()
         # Size of main root window
-        self.WINDOW_WIDTH = 824
+        self.WINDOW_WIDTH = 830
         self.WINDOW_HEIGHT = 600
         self.geometry("{0}x{1}".format(self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         # Width/Height of the single cell
@@ -53,7 +53,7 @@ class SudokuUI(tk.Tk):
         style.configure(
             "TButton",
             font=("Helvetica", 15, "italic"),
-            width=18,
+            width=19,
             borderwidth=0,
             background=COLOUR_BUTTON_NORMAL)
         style.map(
@@ -68,20 +68,18 @@ class SudokuUI(tk.Tk):
         #                                             Buttons
         # Start Game button
         self.button_start_game = ttk.Button(self.button_frame, text="Start new Game", command=self.start_new_game)
-        self.button_start_game.grid(row=0, column=0, pady=(60, 0), padx=(35, 35))
+        self.button_start_game.grid(row=0, column=0, pady=(60, 0), padx=(35, 35), ipady=5)
         # Reset game button
         self.button_reset_current_board = ttk.Button(self.button_frame, text="Reset current Board",
                                                      command=self.reset_current_board)
         self.button_reset_current_board.grid(row=1, column=0, pady=(30, 0), padx=(35, 35))
         # Check button
-        self.button_check = ttk.Button(self.button_frame, text="Check")
+        self.button_check = ttk.Button(self.button_frame, text="Check current answers",
+                                       command=self.check_current_answers)
         self.button_check.grid(row=2, column=0, pady=(30, 0), padx=(35, 35))
         # Show solution button
         self.button_solve = ttk.Button(self.button_frame, text="Show solution", command=self.show_solution)
         self.button_solve.grid(row=3, column=0, pady=(30, 0), padx=(35, 35))
-        # About button
-        self.button_about = ttk.Button(self.button_frame, text="About")
-        self.button_about.grid(row=4, column=0, pady=(30, 0), padx=(35, 35))
         # Quit button
         self.button_quit = ttk.Button(self.button_frame, text="Quit", command=self.destroy)
         self.button_quit.grid(row=7, column=0, pady=(30, 0), padx=(35, 35))
@@ -111,6 +109,10 @@ class SudokuUI(tk.Tk):
     def unbind_(self):
         self.unbind("<Button-1>")
         self.unbind("<Key>")
+
+    def delete_with_tags(self):
+        self.canvas.delete("numbers")
+        self.canvas.delete("red_border")
 
     # Draw grid (straight lines, without numbers)
     def draw_board(self):
@@ -268,6 +270,21 @@ class SudokuUI(tk.Tk):
         self.check_multi_after_methods()
         self.reset_time()
         self.fill_board_with_numbers()
+
+    def check_current_answers(self):
+        self.canvas.delete("numbers")
+        self.canvas.delete("red_border")
+        for i in range(9):
+            for j in range(9):
+                if self.current_board[i][j]:
+                    if self.current_board[i][j] == self.solution[i][j]:
+                        color = "black"
+                    else:
+                        color = "red"
+                    font = ("Helvetica", 14, "bold")
+                    x = self.CELL + j * self.CELL + self.CELL / 2
+                    y = self.CELL + i * self.CELL + self.CELL / 2
+                    self.canvas.create_text(x, y, text=self.solution[i][j], tags="numbers", font=font, fill=color)
 
     def show_solution(self):
         self.canvas.delete("numbers")
