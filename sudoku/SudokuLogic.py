@@ -1,5 +1,5 @@
 import random
-
+import copy
 valid_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
@@ -7,6 +7,7 @@ class Sudoku:
 
     def __init__(self):
         self.board = []
+        self.solved_board = None
         self.new_board()
 
     def new_board(self):
@@ -112,6 +113,7 @@ class Sudoku:
 
     def generate_random_sudoku(self):
         self.generate_random_full_board()
+        self.solved_board = copy.deepcopy(self.board)
         how_many_numbers = random.randint(60, 65)
         print(how_many_numbers)
         sequence = [i for i in range(81)]

@@ -30,6 +30,8 @@ class SudokuUI(tk.Tk):
         # then the value = -1
         self.row = -1
         self.col = -1
+        # ----------------------------------
+        self.stop_the_clock = None
 
         #                                           Frames/canvas
         # Main frame
@@ -68,17 +70,17 @@ class SudokuUI(tk.Tk):
         # Reset game button
         self.button_reset_current_board = ttk.Button(self.button_frame, text="Reset current Board")
         self.button_reset_current_board.grid(row=1, column=0, pady=(30, 0), padx=(35, 35))
-        # Show hint button
-        self.button_show_hint = ttk.Button(self.button_frame, text="Show hint")
-        self.button_show_hint.grid(row=2, column=0, pady=(30, 0), padx=(35, 35))
+        # Check button
+        self.button_check = ttk.Button(self.button_frame, text="Check")
+        self.button_check.grid(row=2, column=0, pady=(30, 0), padx=(35, 35))
         # Show solution button
-        self.button_solve = ttk.Button(self.button_frame, text="Show solution")
+        self.button_solve = ttk.Button(self.button_frame, text="Show solution", command=self.show_solution)
         self.button_solve.grid(row=3, column=0, pady=(30, 0), padx=(35, 35))
         # About button
         self.button_about = ttk.Button(self.button_frame, text="About")
         self.button_about.grid(row=4, column=0, pady=(30, 0), padx=(35, 35))
         # Quit button
-        self.button_quit = ttk.Button(self.button_frame, text="Quit")
+        self.button_quit = ttk.Button(self.button_frame, text="Quit", command=self.destroy)
         self.button_quit.grid(row=7, column=0, pady=(30, 0), padx=(35, 35))
         #                                             Labels
         # Your time label
@@ -89,12 +91,7 @@ class SudokuUI(tk.Tk):
         self.label_timer = ttk.Label(self.button_frame, textvariable=self.text_variable, style="timer.TLabel")
         self.label_timer.grid(row=6, column=0)
 
-        # Events
-        self.bind("<Button-1>", self.on_click_left)  # Left click (select/deselect cell)
-        #self.bind("<Button-3>", self.on_click)  # Right click (delete content of the cell (if possible))
-        self.bind("<Key>", self.key_pressed)  # Keyboard
-
-        #
+        # Initialize boards
         self.sudoku = Sudoku()  # Sudoku logic
         self.random_board_original = None  # Original board generated with SudokuLogic
         self.current_board = None  # Current board where we put user input
@@ -102,7 +99,6 @@ class SudokuUI(tk.Tk):
 
         self.draw_board()
         self.start_new_game()
-        self.update_time()
 
     # Draw grid (straight lines, without numbers)
     def draw_board(self):
@@ -191,6 +187,8 @@ class SudokuUI(tk.Tk):
 
     def update_time(self):
         # The time is displayed in format -> hours:minutes:seconds
+        if self.stop_the_clock:
+            return
         # Seconds
         if self.seconds < 10:
             seconds = "0"+str(self.seconds)
@@ -228,12 +226,42 @@ class SudokuUI(tk.Tk):
 
     # Start new game -> reset time, remove current board and display new one
     def start_new_game(self):
+        # Start the clock
+        self.stop_the_clock = False
+        self.update_time()
+        # Events
+        self.bind("<Button-1>", self.on_click_left)  # Left click (select/deselect cell)
+        # self.bind("<Button-3>", self.on_click) # Right click (delete content of the cell (if possible))
+        self.bind("<Key>", self.key_pressed)  # Keyboard
+        # Reset time from last game
         self.reset_time()
+        # Generate new board and remove old elements from grid
         self.sudoku.new_board()
         self.canvas.delete("numbers")
         self.random_board_original = self.sudoku.generate_random_sudoku()
+        self.solution = self.sudoku.solved_board
         self.current_board = copy.deepcopy(self.random_board_original)
         self.fill_board_with_numbers()
+
+    def show_solution(self):
+        self.canvas.delete("numbers")
+        self.canvas.delete("red_border")
+        # When the solution pops up, the user can't put any data into grid (remove events)
+        self.unbind("<Button-1>")
+        self.unbind("<Key>")
+        # Stop updating the time when the solution is visible
+        self.stop_the_clock = True
+        for i in range(9):
+            for j in range(9):
+                if self.current_board[i][j] == self.solution[i][j] or self.current_board[i][j] == 0:
+                    color = "black"
+                else:
+                    # Use red font color if the answer is incorrect
+                    color = "red"
+                font = ("Helvetica", 14, "bold")
+                x = self.CELL + j * self.CELL + self.CELL / 2
+                y = self.CELL + i * self.CELL + self.CELL / 2
+                self.canvas.create_text(x, y, text=self.solution[i][j], tags="numbers", font=font, fill=color)
 
 
 sudokuUI = SudokuUI()
