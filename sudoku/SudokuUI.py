@@ -1,3 +1,5 @@
+import time
+
 from sudoku.SudokuLogic import Sudoku
 import tkinter as tk
 from tkinter import ttk
@@ -32,7 +34,7 @@ class SudokuUI(tk.Tk):
         self.col = -1
         # ----------------------------------
         self.stop_the_clock = None
-
+        self.multiple_after_methods = None
         #                                           Frames/canvas
         # Main frame
         self.container = tk.Frame(self, width=self.WINDOW_WIDTH, height=self.WINDOW_HEIGHT)
@@ -68,7 +70,8 @@ class SudokuUI(tk.Tk):
         self.button_start_game = ttk.Button(self.button_frame, text="Start new Game", command=self.start_new_game)
         self.button_start_game.grid(row=0, column=0, pady=(60, 0), padx=(35, 35))
         # Reset game button
-        self.button_reset_current_board = ttk.Button(self.button_frame, text="Reset current Board")
+        self.button_reset_current_board = ttk.Button(self.button_frame, text="Reset current Board",
+                                                     command=self.reset_current_board)
         self.button_reset_current_board.grid(row=1, column=0, pady=(30, 0), padx=(35, 35))
         # Check button
         self.button_check = ttk.Button(self.button_frame, text="Check")
@@ -100,6 +103,15 @@ class SudokuUI(tk.Tk):
         self.draw_board()
         self.start_new_game()
 
+    def bind_(self):
+        self.bind("<Button-1>", self.on_click_left)  # Left click (select/deselect cell)
+        # self.bind("<Button-3>", self.on_click) # Right click (delete content of the cell (if possible))
+        self.bind("<Key>", self.key_pressed)  # Keyboard
+
+    def unbind_(self):
+        self.unbind("<Button-1>")
+        self.unbind("<Key>")
+
     # Draw grid (straight lines, without numbers)
     def draw_board(self):
         for i in range(1, 11):
@@ -111,7 +123,6 @@ class SudokuUI(tk.Tk):
                 line_width = 1
             if i == 1 or i == 10:
                 line_width = 2.2
-
             # Horizontal lines
             x0 = self.CELL
             y0 = i * self.CELL
@@ -191,7 +202,7 @@ class SudokuUI(tk.Tk):
             return
         # Seconds
         if self.seconds < 10:
-            seconds = "0"+str(self.seconds)
+            seconds = "0" + str(self.seconds)
         else:
             seconds = str(self.seconds)
         # Minutes
@@ -206,7 +217,7 @@ class SudokuUI(tk.Tk):
             hours = "0" + str(self.hours) + ":"
 
         # When this variable is updated, the label_timer text is change
-        self.text_variable.set(hours+minutes+":"+seconds)
+        self.text_variable.set(hours + minutes + ":" + seconds)
         # Update seconds, minutes and hours
         if self.seconds == 59:
             self.minutes += 1
@@ -218,21 +229,26 @@ class SudokuUI(tk.Tk):
 
         self.seconds += 1
         # After 1 s call update_time method
-        self.after(1000, self.update_time)
+        self.multiple_after_methods = self.after(1000, self.update_time)
 
     def reset_time(self):
         self.seconds = 0
         self.minutes = 0
 
+    def check_multi_after_methods(self):
+        if self.multiple_after_methods:
+            self.after_cancel(self.multiple_after_methods)
+            self.multiple_after_methods = None
+        self.update_time()
+
     # Start new game -> reset time, remove current board and display new one
     def start_new_game(self):
         # Start the clock
         self.stop_the_clock = False
-        self.update_time()
+        self.check_multi_after_methods()
         # Events
-        self.bind("<Button-1>", self.on_click_left)  # Left click (select/deselect cell)
-        # self.bind("<Button-3>", self.on_click) # Right click (delete content of the cell (if possible))
-        self.bind("<Key>", self.key_pressed)  # Keyboard
+        self.bind_()
+
         # Reset time from last game
         self.reset_time()
         # Generate new board and remove old elements from grid
@@ -243,12 +259,21 @@ class SudokuUI(tk.Tk):
         self.current_board = copy.deepcopy(self.random_board_original)
         self.fill_board_with_numbers()
 
+    def reset_current_board(self):
+        self.current_board = copy.deepcopy(self.random_board_original)
+        self.canvas.delete("numbers")
+        self.canvas.delete("red_border")
+        self.bind_()
+        self.stop_the_clock = False
+        self.check_multi_after_methods()
+        self.reset_time()
+        self.fill_board_with_numbers()
+
     def show_solution(self):
         self.canvas.delete("numbers")
         self.canvas.delete("red_border")
         # When the solution pops up, the user can't put any data into grid (remove events)
-        self.unbind("<Button-1>")
-        self.unbind("<Key>")
+        self.unbind_()
         # Stop updating the time when the solution is visible
         self.stop_the_clock = True
         for i in range(9):
