@@ -6,6 +6,10 @@ valid_numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 class Sudoku:
 
     def __init__(self):
+        self.board = []
+        self.new_board()
+
+    def new_board(self):
         self.board = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0],

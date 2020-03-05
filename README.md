@@ -2,7 +2,6 @@
 
 - [Snake](#snake)
 - [Sudoku](#sudoku)
-
 - [BattleShip](#battleship)
 - [Chess](#chess)
 
