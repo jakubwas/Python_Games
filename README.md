@@ -1,4 +1,3 @@
-## :warning: PLEASE SECURE MASTER BRANCH :warning:
 
 ## Games developed with Python
 
@@ -44,7 +43,7 @@ WIP
 WIP
 
 # Version history
-
+### Snake
 - Version 1.0
   - Core components created: *Start new game*, *Reset current Board*, *Check current answers*,
   *Show solution* and *Difficulty level*
