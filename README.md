@@ -1,3 +1,5 @@
+## :warning: PLEASE SECURE MASTER BRANCH :warning:
+
 ## Games developed with Python
 
 ## Table of contents
