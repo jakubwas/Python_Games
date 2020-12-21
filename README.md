@@ -5,9 +5,6 @@
 
 - [Snake](#snake)
 - [Sudoku](#sudoku)
-- [Battleships](#battleships)
-- [Chess](#chess)
-- [Version history](#version-history)
 
 # Snake
 
@@ -33,19 +30,3 @@ solution. The most important component in this game is the SudokuLogic class, wh
 algorithm was implemented. We use backtracking to generate random sudoku puzzles and to find the solution.
 
 ![Sudoku_Start Window](img/sudoku.png)
-
-# Battleships
-
-WIP
-
-# Chess
-
-WIP
-
-# Version history
-### Snake
-- Version 1.0
-  - Core components created: *Start new game*, *Reset current Board*, *Check current answers*,
-  *Show solution* and *Difficulty level*
-  - Created logic of the game: generate random sudoku puzzles and find the solution
-  - Applied styling
